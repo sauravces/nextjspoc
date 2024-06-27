@@ -1,27 +1,32 @@
 import ProductTable from "./productlist";
-import { Product } from "@/lib/types";
-import { getAllProductAction } from "@/app/actions/actions";
+import { getAllProduct } from "@/app/actions/actions";
+import Loading from "@/app/loading";
+import ErrorComponent from "@/app/error";
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+}
 
 export default async function SSRProducts() {
+  let products: Product[] | undefined;
   try {
-    const products = await getAllProductAction();
+    const productsResponse = await getAllProduct();
 
-    if (!products.success) {
-      throw new Error(products.message || "Failed to fetch products");
+    if (!productsResponse.success) {
+      throw new Error(productsResponse.message || "Failed to fetch products");
     }
 
-    const products1: Product[] | undefined = products.product;
-
-    return (
-      <>
-        { products1 !== undefined
-          ? <ProductTable initialProducts={products1} />
-          : "Failed to Load the Products"
-        }
-      </>
-    );
+    products = productsResponse.product;
   } catch (error) {
-    console.error("Error fetching products:", error);
-    return "Failed to Load the Products";
+    return <ErrorComponent error={error as Error} />;
   }
+
+  return (
+    <>
+      {products ? <ProductTable initialProducts={products} /> : <Loading />}
+    </>
+  );
 }

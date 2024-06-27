@@ -1,10 +1,12 @@
-export default function useRequests(){
+const BASE_ROUTE = `${process.env.NEXT_BACKEND_API_URL}/product`;
+
+export default function Requests(){
     const endpoints={
-        getAllProducts:`${process.env.NEXT_BACKEND_API_URL}/product`,
-        createProduct:`${process.env.NEXT_BACKEND_API_URL}/product`,
-        deleteProductById:`${process.env.NEXT_BACKEND_API_URL}/Product`,
-        updateProductById:`${process.env.NEXT_BACKEND_API_URL}/product`,
-        getProductById:`${process.env.NEXT_BACKEND_API_URL}/product`,
+        getAllProducts:BASE_ROUTE,
+        createProduct:BASE_ROUTE,
+        deleteProductById:BASE_ROUTE,
+        updateProductById:BASE_ROUTE,
+        getProductById:BASE_ROUTE,
     }
     return endpoints;
 }

@@ -20,22 +20,28 @@ import {
 import {
   Typography,
   Stack,
-  IconButton,
-  CircularProgress,
-  Box,
+  IconButton
 } from "@mui/material";
 import { useState } from "react";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { deleteProductAction } from "@/app/actions/actions";
+import { deleteProduct } from "@/app/actions/actions";
 import { useToast } from "@/components/ui/use-toast";
-import { Product, ProductTableProps } from "@/lib/types";
+
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+}
+export interface ProductTableProps {
+  initialProducts: Product[];
+}
 
 export default function ProductTable({ initialProducts }: ProductTableProps) {
   const { toast } = useToast();
-  const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>(initialProducts);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -49,7 +55,7 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
 
   const handleDeleteConfirm = async () => {
     if (selectedProduct) {
-      const { success, message } = await deleteProductAction(
+      const { success, message } = await deleteProduct(
         selectedProduct.id
       );
       if (success) {
@@ -70,21 +76,6 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
       }
     }
   };
-
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "100vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
 
   return (
     <>

@@ -201,7 +201,8 @@ const config: Config = {
   // watchman: true,
   moduleNameMapper: {
     // ...
-    '^@/components/(.*)$': '<rootDir>/components/$1',
+   // '^@/components/(.*)$': '<rootDir>/src/$1',
+   '^@/(.*)$': '<rootDir>/src/$1',
   }
 };
 

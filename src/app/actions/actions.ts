@@ -1,13 +1,19 @@
 "use server";
 import { revalidatePath } from "next/cache";
-import useRequests from "@/app/service/request";
+import Requests from "@/app/service/request";
 import { ProductSchema } from "@/lib/schema";
-import { Product } from "@/lib/types";
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-const endpoints = useRequests();
+interface Product {
+  id: string;
+  name: string;
+  description: string;
+  price: string;
+}
 
-export async function handleServerAction(newProduct: unknown) {
+const endpoints = Requests();
+
+export async function createProduct(newProduct: unknown) {
   const result1 = ProductSchema.safeParse(newProduct);
   if (!result1.success) {
     let errorMessage = "";
@@ -45,7 +51,7 @@ export async function handleServerAction(newProduct: unknown) {
   }
 }
 
-export async function deleteProductAction(productId: string) {
+export async function deleteProduct(productId: string) {
     try {
       const response = await fetch(`${endpoints.deleteProductById}/${productId}`, {
         method: "DELETE",
@@ -69,33 +75,38 @@ export async function deleteProductAction(productId: string) {
     }
   }
   
-export async function getAllProductAction(){
+  export async function getAllProduct() {
     try {
-        let products: Product[] = [];
-        const response = await fetch(endpoints.getAllProducts,{headers: {cache: 'force-cache' }});
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data = await response.json();
-    
-        products = data.map((product: any) => ({
-          id: product.id.toString(),
-          name: product.name,
-          description: product.description,
-          price: product.price,
-        }));
+      const response = await fetch(endpoints.getAllProducts, { headers: { cache: 'force-cache' } });
+  
+      if (!response.ok) {
         return {
-            success: true,
-            message: `Get product successfully.`,
-            product: products,
-          };
-    
-      } catch (error) {
-        console.error("Error fetching products:", error);
-        return {
-            success: false,
-            message: `Get product failed.`,
-            product:[]
-          };
+          success: false,
+          message: `HTTP error! Status: ${response.status}`,
+          product: [],
+        };
       }
-}
+  
+      const data = await response.json();
+  
+      const products = data.map((product: any) => ({
+        id: product.id.toString(),
+        name: product.name,
+        description: product.description,
+        price: product.price,
+      }));
+  
+      return {
+        success: true,
+        message: `Get product successfully.`,
+        product: products,
+      };
+    } catch (error) {
+      console.error("Error fetching products:", error);
+      return {
+        success: false,
+        message: `Get product failed.`,
+        product: [],
+      };
+    }
+  }  
