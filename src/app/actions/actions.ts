@@ -34,7 +34,7 @@ export async function createProduct(newProduct: unknown) {
       body: JSON.stringify(result1.data),
     });
     if (!response.ok) {
-      throw new Error(`HTTP error! Status: ${response.status}`);
+      return { success: false, message: "Failed to create product" };
     }
     const result = await response.json();
 
@@ -46,8 +46,56 @@ export async function createProduct(newProduct: unknown) {
       product: result,
     };
   } catch (e) {
-    console.error("Error creating product:", e);
+    console.log("Error creating product:", e);
     return { success: false, message: "Failed to create product" };
+  }
+}
+
+export async function editProduct(newProduct: Product) {
+  const result = ProductSchema.safeParse(newProduct);
+  
+  if (!result.success) {
+    let errorMessage = "";
+    result.error.issues.forEach((issue) => {
+      errorMessage += `${issue.path[0]}: ${issue.message}. `;
+    });
+
+    return {
+      error: errorMessage,
+    };
+  }
+console.log("result data",result.data);
+  try {
+    const response = await fetch(`${endpoints.updateProductById}/${newProduct.id}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(result.data),
+    });
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: "Failed to update product",
+      };
+    }
+
+    const updatedProduct = await response.json();
+
+    revalidatePath("/product/productList");
+
+    return {
+      success: true,
+      message: `Updated product ${result.data.name}`,
+      product: updatedProduct,
+    };
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return {
+      success: false,
+      message: "Failed to update product",
+    };
   }
 }
 
@@ -110,3 +158,40 @@ export async function deleteProduct(productId: string) {
       };
     }
   }  
+
+  export async function getProductById(productId: string) {
+    try {
+      const response = await fetch(`${endpoints.getProductById}/${productId}`, { headers: { cache: 'force-cache' } });
+  
+      if (!response.ok) {
+        return {
+          success: false,
+          message: `HTTP error! Status: ${response.status}`,
+          product: null,
+        };
+      }
+  
+      const data = await response.json();
+  
+      const product = {
+        id: data.id.toString(),
+        name: data.name,
+        description: data.description,
+        price: data.price,
+      };
+  
+      return {
+        success: true,
+        message: `Get product successfully.`,
+        product: product,
+      };
+    } catch (error) {
+      console.error("Error fetching product:", error);
+      return {
+        success: false,
+        message: `Get product failed.`,
+        product: null,
+      };
+    }
+  }
+  

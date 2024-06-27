@@ -53,6 +53,10 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
     setSelectedProduct(product);
   };
 
+  const handleEditClick = (id:string)=>{
+    router.push(`/product/${id}`)
+  }
+
   const handleDeleteConfirm = async () => {
     if (selectedProduct) {
       const { success, message } = await deleteProduct(
@@ -106,6 +110,12 @@ export default function ProductTable({ initialProducts }: ProductTableProps) {
               <TableCell>{product.price}</TableCell>
               <TableCell>
                 <Stack direction="row">
+                <IconButton
+                    size="small"
+                    onClick={() => handleEditClick(product.id)}
+                  >
+                    <EditIcon  />
+                  </IconButton>
                   <IconButton
                     size="small"
                     onClick={(event) => handleDeleteClick(product, event)}
